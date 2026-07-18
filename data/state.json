@@ -1,0 +1,16 @@
+{
+  "duration_seconds": 86400,
+  "remaining_seconds": 86400,
+  "running": false,
+  "end_time": null,
+  "title": "24 HOURS OF CHAOS",
+  "subtitle": "LIVE WITH",
+  "host_name": "YOUR NAME",
+  "primary_color": "#f1f1ed",
+  "secondary_color": "#c42d2d",
+  "text_color": "#f7f7f2",
+  "portal_speed": 1.0,
+  "glow_strength": 0.75,
+  "show_milliseconds": false,
+  "updated_at": 0
+}

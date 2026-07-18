@@ -1,0 +1,1 @@
+"# 24h"  initgit add README.mdgit commit -m "first commit"git branch -M maingit remote add origin https://github.com/idhsn/24h.gitgit push -u origin main

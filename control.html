@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shared Timer Control</title>
+<style>
+:root{color-scheme:dark;font-family:Arial,Helvetica,sans-serif}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;color:#f4f4ef;background:
+  repeating-linear-gradient(165deg,transparent 0 24px,rgba(255,255,255,.018) 25px,transparent 27px),
+  radial-gradient(circle at 10% 0%,#282828 0,transparent 34%),#090909;
+}
+.wrap{width:min(1240px,94vw);margin:auto;padding:28px 0 50px}
+.masthead{display:flex;align-items:end;gap:18px;margin-bottom:20px}
+h1{margin:0;font-family:Impact,"Arial Narrow Bold",sans-serif;font-size:clamp(34px,6vw,72px);line-height:.86;letter-spacing:.02em;transform:scaleX(.82);transform-origin:left}
+.lead{max-width:650px;color:#a8a8a2;line-height:1.5;margin:0 0 4px}
+.grid{display:grid;grid-template-columns:.9fr 1.35fr;gap:18px}
+.card{position:relative;border:1px solid #383838;background:#111;padding:18px;box-shadow:10px 10px 0 #e9e9e3}
+.card:before{content:"";position:absolute;inset:7px;border:1px dashed rgba(255,255,255,.08);pointer-events:none}
+.card>*{position:relative;z-index:1}
+h2{font-family:Impact,"Arial Narrow Bold",sans-serif;font-size:20px;letter-spacing:.12em;margin:0 0 14px;text-transform:uppercase}
+.display{
+  text-align:center;font-family:Impact,"Arial Narrow Bold",sans-serif;
+  font-size:clamp(48px,7vw,88px);font-variant-numeric:tabular-nums;
+  letter-spacing:.035em;padding:8px 0 18px;
+}
+.row,.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.status{margin-left:auto;font-size:12px;font-weight:900;letter-spacing:.13em;color:#ddd}
+button,input{font:inherit}
+button{
+  border:1px solid #565656;border-radius:0;padding:11px 15px;
+  color:#f8f8f4;background:#1d1d1d;font-weight:900;cursor:pointer;text-transform:uppercase;
+}
+button:hover{background:#2b2b2b}
+button.primary{background:#ededE8;color:#090909;border-color:#ededE8}
+button.danger{background:#a92c2c;border-color:#c34141}
+label{display:block;color:#aaa;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin:13px 0 6px}
+input[type=text],input[type=password],input[type=number]{
+  width:100%;border:1px solid #414141;border-radius:0;background:#080808;color:#fff;padding:12px;outline:none
+}
+input:focus{border-color:#eee}
+input[type=color]{width:100%;height:43px;border:1px solid #414141;background:#080808;padding:3px}
+input[type=range]{width:100%}
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+iframe{display:block;width:100%;aspect-ratio:16/9;border:1px solid #444;background:#050505}
+.hint{font-size:12px;color:#aaa;line-height:1.55;margin-top:15px}
+code{color:#fff;background:#050505;border:1px solid #333;padding:3px 5px;word-break:break-all}
+.auth{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:15px}
+.switch{display:flex;align-items:center;gap:8px;margin-top:13px;color:#bbb;font-size:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.masthead{display:block}.lead{margin-top:10px}.style-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="masthead">
+    <h1>PORTAL<br>TIMER</h1>
+    <p class="lead">Shared cloud control for both OBS setups. The overlay is public; changing the timer requires your private admin key.</p>
+  </div>
+
+  <div class="grid">
+    <div>
+      <section class="card">
+        <h2>Admin access</h2>
+        <div class="auth">
+          <input id="adminKey" type="password" placeholder="Enter ADMIN_KEY">
+          <button onclick="saveKey()">Unlock</button>
+        </div>
+
+        <div class="row">
+          <h2>Countdown</h2>
+          <span class="status" id="connection">CONNECTING</span>
+        </div>
+        <div class="display" id="display">24:00:00</div>
+        <div class="actions">
+          <button class="primary" onclick="act('start')">Start</button>
+          <button onclick="act('pause')">Pause</button>
+          <button class="danger" onclick="act('reset')">Reset</button>
+        </div>
+
+        <label>Set countdown</label>
+        <div class="time-grid">
+          <input id="hours" type="number" min="0" value="24" placeholder="Hours">
+          <input id="minutes" type="number" min="0" max="59" value="0" placeholder="Minutes">
+          <input id="seconds" type="number" min="0" max="59" value="0" placeholder="Seconds">
+        </div>
+        <button style="width:100%;margin-top:8px" onclick="setTime()">Set time</button>
+
+        <label>Fast adjustments</label>
+        <div class="actions">
+          <button onclick="adjust(60)">+1 min</button>
+          <button onclick="adjust(300)">+5 min</button>
+          <button onclick="adjust(3600)">+1 hour</button>
+          <button onclick="adjust(-60)">−1 min</button>
+          <button onclick="adjust(-300)">−5 min</button>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:18px">
+        <h2>Poster text</h2>
+        <label>Main title</label>
+        <input id="title" type="text" value="24 HOURS OF CHAOS">
+        <label>Right-side text</label>
+        <input id="subtitle" type="text" value="LIVE WITH">
+        <label>Name below timer</label>
+        <input id="host_name" type="text" value="YOUR NAME">
+
+        <h2 style="margin-top:22px">Design</h2>
+        <div class="style-grid">
+          <div><label>Paper white</label><input id="primary_color" type="color" value="#f1f1ed"></div>
+          <div><label>Accent red</label><input id="secondary_color" type="color" value="#c42d2d"></div>
+          <div><label>Text</label><input id="text_color" type="color" value="#f7f7f2"></div>
+        </div>
+        <label>Portal movement: <span id="speedValue">1.00</span>×</label>
+        <input id="portal_speed" type="range" min=".2" max="3" step=".05" value="1">
+        <label>Light intensity: <span id="glowValue">0.75</span>×</label>
+        <input id="glow_strength" type="range" min=".1" max="2.5" step=".05" value=".75">
+        <label class="switch"><input id="show_milliseconds" type="checkbox"> Show hundredths</label>
+        <button class="primary" style="width:100%;margin-top:15px" onclick="saveStyle()">Save design</button>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Live OBS preview</h2>
+      <iframe src="/overlay.html"></iframe>
+      <div class="hint">
+        Both you and your friend add this URL as an OBS Browser Source:<br><br>
+        <code id="overlayUrl"></code><br><br>
+        Recommended browser size: <code>1920 × 1080</code>. Do not put the admin key in OBS.
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $ = selector => document.querySelector(selector);
+let state = null;
+let offsetMs = 0;
+let formLoaded = false;
+let adminKey = localStorage.getItem("portalTimerAdminKey") || "";
+
+$("#adminKey").value = adminKey;
+$("#overlayUrl").textContent = `${location.origin}/overlay.html`;
+
+function saveKey(){
+  adminKey = $("#adminKey").value.trim();
+  localStorage.setItem("portalTimerAdminKey", adminKey);
+  $("#connection").textContent = adminKey ? "KEY SAVED" : "KEY REQUIRED";
+}
+
+function serverNow(){ return (Date.now() + offsetMs) / 1000; }
+
+function remaining(){
+  if(!state) return 0;
+  if(state.running && state.end_time) return Math.max(0, state.end_time - serverNow());
+  return Math.max(0, Number(state.remaining_seconds) || 0);
+}
+
+function formatTime(seconds){
+  seconds = Math.max(0, Number(seconds) || 0);
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+async function post(payload){
+  adminKey = $("#adminKey").value.trim();
+  localStorage.setItem("portalTimerAdminKey", adminKey);
+  $("#connection").textContent = "SAVING";
+  try{
+    const response = await fetch("/api/state", {
+      method:"POST",
+      headers:{"Content-Type":"application/json","X-Admin-Key":adminKey},
+      body:JSON.stringify(payload)
+    });
+    const result = await response.json();
+    if(!response.ok){
+      $("#connection").textContent = response.status === 401 ? "BAD KEY" : "ERROR";
+      return;
+    }
+    state = result;
+    $("#connection").textContent = "SAVED";
+  }catch(error){
+    $("#connection").textContent = "OFFLINE";
+  }
+}
+
+function act(action){ post({action}); }
+function adjust(seconds){ post({action:"adjust",seconds}); }
+
+function setTime(){
+  const hours = Math.max(0, Number($("#hours").value) || 0);
+  const minutes = Math.max(0, Number($("#minutes").value) || 0);
+  const seconds = Math.max(0, Number($("#seconds").value) || 0);
+  post({action:"set_time",seconds:hours*3600 + minutes*60 + seconds});
+}
+
+function saveStyle(){
+  post({
+    action:"update",
+    title:$("#title").value,
+    subtitle:$("#subtitle").value,
+    host_name:$("#host_name").value,
+    primary_color:$("#primary_color").value,
+    secondary_color:$("#secondary_color").value,
+    text_color:$("#text_color").value,
+    portal_speed:Number($("#portal_speed").value),
+    glow_strength:Number($("#glow_strength").value),
+    show_milliseconds:$("#show_milliseconds").checked
+  });
+}
+
+function fillForm(){
+  if(!state || formLoaded) return;
+  for(const key of ["title","subtitle","host_name","primary_color","secondary_color","text_color"]){
+    if(state[key] !== undefined) $(`#${key}`).value = state[key];
+  }
+  $("#portal_speed").value = state.portal_speed || 1;
+  $("#glow_strength").value = state.glow_strength || .75;
+  $("#show_milliseconds").checked = !!state.show_milliseconds;
+  $("#speedValue").textContent = Number($("#portal_speed").value).toFixed(2);
+  $("#glowValue").textContent = Number($("#glow_strength").value).toFixed(2);
+  formLoaded = true;
+}
+
+async function sync(){
+  try{
+    const sent = Date.now();
+    const response = await fetch(`/api/state?t=${sent}`, {cache:"no-store"});
+    const received = Date.now();
+    if(!response.ok) throw new Error("sync");
+    const next = await response.json();
+    offsetMs = next.server_time * 1000 - ((sent + received) / 2);
+    state = next;
+    fillForm();
+    $("#connection").textContent = "CONNECTED";
+  }catch(error){
+    $("#connection").textContent = "OFFLINE";
+  }
+}
+
+$("#portal_speed").addEventListener("input", event => $("#speedValue").textContent = Number(event.target.value).toFixed(2));
+$("#glow_strength").addEventListener("input", event => $("#glowValue").textContent = Number(event.target.value).toFixed(2));
+
+setInterval(sync, 700);
+setInterval(() => $("#display").textContent = formatTime(remaining()), 100);
+sync();
+</script>
+</body>
+</html>
