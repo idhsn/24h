@@ -33,6 +33,7 @@ DEFAULT_STATE = {
     "portal_speed": 1.0,
     "glow_strength": 0.75,
     "show_milliseconds": False,
+    "timer_only": False,
     "updated_at": time.time(),
 }
 
@@ -180,6 +181,8 @@ def update_state():
                     STATE["glow_strength"] = clamp(float(payload["glow_strength"]), 0.1, 2.5)
                 if "show_milliseconds" in payload:
                     STATE["show_milliseconds"] = bool(payload["show_milliseconds"])
+                if "timer_only" in payload:
+                    STATE["timer_only"] = bool(payload["timer_only"])
 
             else:
                 return jsonify({"error": "Unknown action"}), 400

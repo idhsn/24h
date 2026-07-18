@@ -36,6 +36,15 @@ Share the key with your friend only if your friend should also control the timer
 4. Open `http://127.0.0.1:8765/control.html`.
 5. The local test admin key is `change-me`.
 
+
+## Timer-only transparent mode
+
+In the control panel, enable:
+
+`Timer only — hide all background, portal, labels and title`
+
+The OBS browser source will immediately switch to a transparent view containing only the countdown digits. Disable it to restore the full grunge poster and animated portal.
+
 ## OBS
 
 On both computers:
@@ -83,4 +92,3 @@ Without persistent storage, synchronization still works while the service is run
 - `Dockerfile` — Railway/Fly/Docker deployment
 - `railway.json` — Railway service configuration
 - `render.yaml` — Render blueprint
-# 24h

@@ -12,5 +12,6 @@
   "portal_speed": 1.0,
   "glow_strength": 0.75,
   "show_milliseconds": false,
-  "updated_at": 0
+  "updated_at": 0,
+  "timer_only": false
 }

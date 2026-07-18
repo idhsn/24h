@@ -118,6 +118,7 @@ code{color:#fff;background:#050505;border:1px solid #333;padding:3px 5px;word-br
         <label>Light intensity: <span id="glowValue">0.75</span>×</label>
         <input id="glow_strength" type="range" min=".1" max="2.5" step=".05" value=".75">
         <label class="switch"><input id="show_milliseconds" type="checkbox"> Show hundredths</label>
+        <label class="switch"><input id="timer_only" type="checkbox"> Timer only — hide all background, portal, labels and title</label>
         <button class="primary" style="width:100%;margin-top:15px" onclick="saveStyle()">Save design</button>
       </section>
     </div>
@@ -209,7 +210,8 @@ function saveStyle(){
     text_color:$("#text_color").value,
     portal_speed:Number($("#portal_speed").value),
     glow_strength:Number($("#glow_strength").value),
-    show_milliseconds:$("#show_milliseconds").checked
+    show_milliseconds:$("#show_milliseconds").checked,
+    timer_only:$("#timer_only").checked
   });
 }
 
@@ -221,6 +223,7 @@ function fillForm(){
   $("#portal_speed").value = state.portal_speed || 1;
   $("#glow_strength").value = state.glow_strength || .75;
   $("#show_milliseconds").checked = !!state.show_milliseconds;
+  $("#timer_only").checked = !!state.timer_only;
   $("#speedValue").textContent = Number($("#portal_speed").value).toFixed(2);
   $("#glowValue").textContent = Number($("#glow_strength").value).toFixed(2);
   formLoaded = true;
